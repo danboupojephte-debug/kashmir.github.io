@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOUPO Dan Jephté — Informaticien Système</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0E141B;
+    --bg-panel: #141C25;
+    --bg-panel-2: #182230;
+    --line: #26333F;
+    --text: #E7ECF0;
+    --text-dim: #8B9AA8;
+    --amber: #FF9A44;
+    --amber-dim: #7A5430;
+    --teal: #4FD1C5;
+    --teal-dim: #235049;
+    --red-led: #FF5D5D;
+    --radius: 3px;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber); color:#0E141B;}
+
+  a{color:inherit; text-decoration:none;}
+
+  .noise{
+    position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .scan{
+    position:fixed; inset:0; pointer-events:none; z-index:2; opacity:.5;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+  }
+
+  /* ---------- topbar ---------- */
+  header{
+    position:sticky; top:0; z-index:20;
+    background:rgba(14,20,27,.88);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    max-width:1100px; margin:0 auto; padding:14px 20px;
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:var(--mono); font-size:13px; gap:12px; flex-wrap:wrap;
+  }
+  .nav .id{color:var(--amber); display:flex; align-items:center; gap:8px; letter-spacing:.5px; white-space:nowrap;}
+  .led{width:7px; height:7px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px var(--teal); animation:pulse 2.4s ease-in-out infinite; flex-shrink:0;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .nav ul{display:flex; gap:18px; list-style:none; flex-wrap:wrap; row-gap:6px;}
+  .nav ul a{color:var(--text-dim); transition:color .15s;}
+  .nav ul a:hover{color:var(--amber);}
+  @media (max-width:560px){
+    .nav{padding:12px 16px; gap:8px;}
+    .nav .id{font-size:12px;}
+    .nav ul{gap:12px; font-size:11.5px; width:100%; justify-content:flex-start;}
+  }
+
+  /* ---------- hero / boot screen ---------- */
+  .hero{
+    max-width:1100px; margin:0 auto; padding:64px 24px 40px;
+    position:relative; z-index:3;
+  }
+  .boot{
+    font-family:var(--mono); font-size:12.5px; color:var(--teal);
+    border:1px solid var(--line); background:var(--bg-panel);
+    border-radius:var(--radius); padding:16px 18px; max-width:560px; width:100%;
+    white-space:pre-wrap; overflow-x:auto;
+  }
+  .boot .ok{color:var(--teal);}
+  .boot .warn{color:var(--amber);}
+  .boot .dim{color:var(--text-dim);}
+  .cursor{display:inline-block; width:7px; height:13px; background:var(--amber); vertical-align:-2px; animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  .hero-grid{
+    display:grid; grid-template-columns:1.3fr 1fr; gap:36px; margin-top:36px; align-items:start;
+  }
+  @media (max-width:860px){ .hero-grid{grid-template-columns:1fr;} }
+
+  h1.name{
+    font-family:var(--mono); font-weight:800; font-size:clamp(30px,5vw,50px);
+    letter-spacing:-1px; line-height:1.05; color:var(--text);
+  }
+  h1.name span{color:var(--amber);}
+  .role{
+    margin-top:10px; font-family:var(--mono); font-size:15px; color:var(--teal);
+    letter-spacing:.5px;
+  }
+  .pitch{margin-top:18px; max-width:520px; color:var(--text-dim); font-size:15.5px;}
+  .loc{margin-top:18px; font-family:var(--mono); font-size:12.5px; color:var(--text-dim); display:flex; gap:16px; flex-wrap:wrap;}
+  .loc b{color:var(--text);}
+
+  .spec-panel{
+    border:1px solid var(--line); background:var(--bg-panel);
+    border-radius:var(--radius); overflow:hidden;
+  }
+  .spec-panel .head{
+    padding:10px 14px; background:var(--bg-panel-2); border-bottom:1px solid var(--line);
+    font-family:var(--mono); font-size:11px; color:var(--text-dim); letter-spacing:1px;
+    display:flex; justify-content:space-between;
+  }
+  .spec-panel .row{
+    display:flex; justify-content:space-between; padding:9px 14px;
+    border-bottom:1px solid var(--line); font-family:var(--mono); font-size:12.5px;
+  }
+  .spec-panel .row:last-child{border-bottom:none;}
+  .spec-panel .row span:first-child{color:var(--text-dim);}
+  .spec-panel .row span:last-child{color:var(--text); text-align:right;}
+
+  /* ---------- section shell ---------- */
+  section{max-width:1100px; margin:0 auto; padding:70px 24px; position:relative; z-index:3;}
+  .eyebrow{
+    font-family:var(--mono); font-size:11.5px; color:var(--amber); letter-spacing:2px;
+    text-transform:uppercase; display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .eyebrow::before{content:''; width:18px; height:1px; background:var(--amber);}
+  h2{font-family:var(--mono); font-size:clamp(22px,3.4vw,30px); font-weight:700; letter-spacing:-.5px;}
+  .section-intro{color:var(--text-dim); max-width:600px; margin-top:10px; font-size:14.5px;}
+
+  /* ---------- competences ---------- */
+  .diag-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); margin-top:32px; border:1px solid var(--line);}
+  @media (max-width:860px){ .diag-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .diag-grid{grid-template-columns:1fr;} }
+  .diag-card{background:var(--bg-panel); padding:22px 20px;}
+  .diag-card .tag{font-family:var(--mono); font-size:10.5px; color:var(--teal); letter-spacing:1.5px; text-transform:uppercase;}
+  .diag-card h3{margin-top:8px; font-size:16px; font-weight:600; font-family:var(--sans);}
+  .diag-card ul{margin-top:12px; padding-left:0; list-style:none;}
+  .diag-card li{
+    font-size:13px; color:var(--text-dim); padding:5px 0 5px 16px; position:relative;
+  }
+  .diag-card li::before{content:'›'; position:absolute; left:0; color:var(--amber);}
+
+  /* ---------- formation timeline ---------- */
+  .log{margin-top:34px; border-left:1px solid var(--line); padding-left:0;}
+  .log-entry{position:relative; padding:0 0 28px 28px; border-left:1px solid var(--line); margin-left:5px;}
+  .log-entry:last-child{border-color:transparent; padding-bottom:0;}
+  .log-entry::before{
+    content:''; position:absolute; left:-5px; top:2px; width:9px; height:9px; border-radius:50%;
+    background:var(--bg); border:2px solid var(--amber);
+  }
+  .log-date{font-family:var(--mono); font-size:12px; color:var(--amber);}
+  .log-entry h3{margin-top:6px; font-size:16px; font-weight:600;}
+  .log-entry p{margin-top:4px; color:var(--text-dim); font-size:13.5px;}
+
+  /* ---------- projets ---------- */
+  .proj-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:34px;}
+  @media (max-width:780px){ .proj-grid{grid-template-columns:1fr;} }
+  .proj-card{
+    border:1px solid var(--line); background:var(--bg-panel); border-radius:var(--radius);
+    padding:24px; display:flex; flex-direction:column; gap:14px; transition:border-color .2s, transform .2s;
+  }
+  .proj-card:hover{border-color:var(--amber-dim); transform:translateY(-2px);}
+  .proj-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .proj-status{
+    font-family:var(--mono); font-size:10px; letter-spacing:1px; padding:3px 8px; border-radius:2px;
+    background:var(--teal-dim); color:var(--teal); white-space:nowrap; text-transform:uppercase;
+  }
+  .proj-card h3{font-size:18px; font-weight:700; font-family:var(--mono);}
+  .proj-card p{color:var(--text-dim); font-size:13.8px;}
+  .stack{display:flex; flex-wrap:wrap; gap:7px; margin-top:auto;}
+  .stack span{
+    font-family:var(--mono); font-size:11px; color:var(--text-dim); border:1px solid var(--line);
+    padding:3px 8px; border-radius:2px;
+  }
+  .proj-features{list-style:none; margin-top:2px;}
+  .proj-features li{font-size:12.8px; color:var(--text-dim); padding:3px 0 3px 14px; position:relative;}
+  .proj-features li::before{content:'✓'; position:absolute; left:0; color:var(--teal); font-size:11px;}
+
+  /* ---------- projets : emplacements vides ---------- */
+  .proj-card--empty{border-style:dashed; border-color:var(--line);}
+  .proj-card--empty:hover{border-color:var(--amber-dim);}
+  .placeholder-text{color:var(--text-dim); font-weight:500; font-style:italic;}
+  .proj-status--empty{background:transparent; border:1px dashed var(--line); color:var(--text-dim);}
+  .proj-features--empty li{color:var(--text-dim); opacity:.6;}
+  .proj-features--empty li::before{content:'○'; color:var(--text-dim);}
+  .proj-card--empty .stack span{color:var(--text-dim); opacity:.6; border-style:dashed;}
+
+  /* ---------- hobbies strip ---------- */
+  .hobbies{display:flex; flex-wrap:wrap; gap:10px; margin-top:30px;}
+  .hobby{
+    font-family:var(--mono); font-size:12.5px; color:var(--text-dim); border:1px solid var(--line);
+    padding:7px 13px; border-radius:20px; background:var(--bg-panel);
+  }
+
+  /* ---------- contact / footer ---------- */
+  footer{
+    border-top:1px solid var(--line); margin-top:20px; position:relative; z-index:3;
+  }
+  .contact-wrap{max-width:1100px; margin:0 auto; padding:70px 24px 50px;}
+  .contact-panel{
+    border:1px solid var(--line); background:var(--bg-panel); border-radius:var(--radius);
+    padding:32px; display:grid; grid-template-columns:1fr auto; gap:24px; align-items:center;
+  }
+  @media (max-width:700px){ .contact-panel{grid-template-columns:1fr;} }
+  .status-line{display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:12px; color:var(--teal); margin-bottom:14px;}
+  .contact-panel h3{font-size:22px; font-family:var(--mono); font-weight:700;}
+  .contact-panel p{color:var(--text-dim); margin-top:8px; font-size:14px;}
+  .contact-links{display:flex; flex-direction:column; gap:10px; font-family:var(--mono); font-size:13.5px;}
+  .contact-links a{color:var(--text); border-bottom:1px dashed var(--line); padding-bottom:2px; transition:color .15s, border-color .15s;}
+  .contact-links a:hover{color:var(--amber); border-color:var(--amber);}
+  .foot-meta{
+    max-width:1100px; margin:0 auto; padding:0 24px 40px; display:flex; justify-content:space-between;
+    font-family:var(--mono); font-size:11px; color:var(--text-dim); flex-wrap:wrap; gap:8px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+
+  /* ---------- responsive fine-tuning ---------- */
+  @media (max-width:860px){
+    section{padding:56px 20px;}
+    .hero{padding:48px 20px 32px;}
+  }
+  @media (max-width:640px){
+    body{font-size:15px;}
+    section{padding:44px 16px;}
+    .hero{padding:40px 16px 28px;}
+    .boot{font-size:11px; padding:14px;}
+    h1.name{font-size:clamp(26px,8vw,38px);}
+    .pitch{font-size:14.5px;}
+    .spec-panel .row{font-size:11.5px; padding:8px 12px;}
+    .diag-card{padding:18px 16px;}
+    .contact-panel{padding:24px 20px;}
+    .contact-panel h3{font-size:19px;}
+    .foot-meta{flex-direction:column; text-align:center; justify-content:center;}
+  }
+  @media (max-width:400px){
+    .loc{gap:10px;}
+    .nav ul{gap:10px;}
+  }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="scan"></div>
+
+<header>
+  <div class="nav">
+    <div class="id"><span class="led"></span> BOUPO_DAN.SYS</div>
+    <ul>
+      <li><a href="#competences">Compétences</a></li>
+      <li><a href="#formation">Formation</a></li>
+      <li><a href="#projets">Projets</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="boot" id="boot"></div>
+
+  <div class="hero-grid">
+    <div>
+      <h1 class="name">BOUPO Dan <span>Jephté</span></h1>
+      <div class="role">// Informaticien Système &amp; Développeur/Designer</div>
+      <p class="pitch">Maintenance, administration système et sécurité au quotidien — et une envie constante de construire : applications web, réseaux, infographie. Rigueur dans les procédures, autonomie dans la résolution de problèmes.</p>
+      <div class="loc">
+        <span><b>Basé à</b> Libreville, Gabon</span>
+        <span><b>Permis</b> Catégorie B</span>
+        <span><b>Anglais</b> Niveau basique</span>
+      </div>
+    </div>
+
+    <div class="spec-panel">
+      <div class="head"><span>FICHE_TECHNICIEN</span><span>v2026</span></div>
+      <div class="row"><span>OS</span><span>Windows · Linux (Debian)</span></div>
+      <div class="row"><span>Virtualisation</span><span>VirtualBox · VMware</span></div>
+      <div class="row"><span>Réseau</span><span>LAN · Routeurs/Switch</span></div>
+      <div class="row"><span>Dév.</span><span>PHP · HTML · CSS</span></div>
+      <div class="row"><span>Sécurité</span><span>Firewall · Antivirus · MAJ</span></div>
+      <div class="row"><span>Bureautique</span><span>Word · Excel</span></div>
+      <div class="row"><span>Statut</span><span style="color:var(--teal)">Disponible</span></div>
+    </div>
+  </div>
+</div>
+
+<section id="competences">
+  <div class="eyebrow">Diagnostic</div>
+  <h2>Domaines de compétences</h2>
+  <p class="section-intro">Un socle technique construit autour de la maintenance système, complété par des bases solides en développement et une méthode rigoureuse de travail.</p>
+
+  <div class="diag-grid">
+    <div class="diag-card">
+      <div class="tag">Systèmes</div>
+      <h3>Exploitation &amp; matériel</h3>
+      <ul>
+        <li>Installation, configuration Windows / Linux (Debian)</li>
+        <li>BIOS/UEFI, démarrage, partitionnement disque</li>
+        <li>Maintenance préventive et curative (portables, unités centrales)</li>
+        <li>Création des (affiches publicitaires,cartes de visites,flyers,cartes d'anniverssaires et mariages,Cv proffessionnels et lettre de motivation)</li>
+        <li>Traitement d'images </li>
+        <li>installation des logicciels sous windows avec crack</li>
+      </ul>
+    </div>
+    <div class="diag-card">
+      <div class="tag">Sécurité</div>
+      <h3>Système &amp; comptes</h3>
+      <ul>
+        <li>Mises à jour, antivirus, pare-feu</li>
+        <li>Bonnes pratiques : mots de passe, privilèges minimaux</li>
+        <li>Création, modification, suppression de comptes utilisateurs</li>
+      </ul>
+    </div>
+    <div class="diag-card">
+      <div class="tag">Infrastructure</div>
+      <h3>Réseau &amp; virtualisation</h3>
+      <ul>
+        <li>Configuration simple de routeurs / switch, réseau LAN</li>
+        <li>Machines virtuelles via VirtualBox, VMware</li>
+        <li>Installation et maintenance de logiciels sous Windows</li>
+      </ul>
+    </div>
+    <div class="diag-card">
+      <div class="tag">Développement</div>
+      <h3>Bases web</h3>
+      <ul>
+        <li>PHP, HTML, CSS (niveau basique)</li>
+        <li>Visual Studio</li>
+        <li>Curiosité technique orientée applications web</li>
+      </ul>
+    </div>
+    <div class="diag-card">
+      <div class="tag">Méthode</div>
+      <h3>Rigueur &amp; analyse</h3>
+      <ul>
+        <li>Analyse et résolution de problèmes techniques</li>
+        <li>Autonomie dans la recherche de solutions</li>
+        <li>Documentation et suivi des procédures</li>
+      </ul>
+    </div>
+    <div class="diag-card">
+      <div class="tag">Collaboration</div>
+      <h3>Organisation</h3>
+      <ul>
+        <li>Travail en équipe, communication claire</li>
+        <li>Suivi des tâches, gestion du temps</li>
+        <li>Volonté d'apprendre en continu</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="formation">
+  <div class="eyebrow">Journal</div>
+  <h2>Formations</h2>
+
+  <div class="log">
+    <div class="log-entry">
+      <div class="log-date">2022 — 2025</div>
+      <h3>Licence Informatique <span style="color:var(--text-dim); font-weight:400; font-size:13px;">(en cours)</span></h3>
+      <p>Formation universitaire orientée informatique.</p>
+    </div>
+    <div class="log-entry">
+      <div class="log-date">2018 — 2019</div>
+      <h3>DTS — Maintenance Mécanique Industrielle</h3>
+      <p>Centre de Spécialisation Professionnel (ECOLE DE TOTAL), Port-Gentil.</p>
+    </div>
+    <div class="log-entry">
+      <div class="log-date">2017 — 2018</div>
+      <h3>Bac technique — Maintenance Moteur Diesel</h3>
+      <p>Formation technique en maintenance mécanique.</p>
+    </div>
+    <div class="log-entry">
+      <div class="log-date">2019</div>
+      <h3>Formation Career Succès — JA Gabon</h3>
+      <p>Programme de développement professionnel.</p>
+    </div>
+  </div>
+</section>
+
+<section id="projets">
+  <div class="eyebrow">Build log</div>
+  <h2>Projets créés</h2>
+  <p class="section-intro">Section à compléter — remplace les emplacements ci-dessous par tes propres projets (nom, description, fonctionnalités et technologies utilisées).</p>
+
+  <div class="proj-grid">
+    <div class="proj-card proj-card--empty">
+      <div class="proj-top">
+        <h3 class="placeholder-text">affiche proffessionnelle</h3>
+        <span class="proj-status proj-status--empty">À compléter</span>
+      </div>
+      <p class="placeholder-text">affiche publicitaire pour un Informaticien/Designer.</p>
+      <ul class="proj-features proj-features--empty">
+      </ul>
+      <div class="stack">
+        <span>Techno</span><span>Techno</span><span>Techno</span>
+      </div>
+    </div>
+
+    <div class="proj-card proj-card--empty">
+      <div class="proj-top">
+        <h3 class="placeholder-text">page web</h3>
+        <span class="proj-status proj-status--empty">À compléter</span>
+      </div>
+      <p class="placeholder-text">création d'une page web personalisé.</p>
+      <ul class="proj-features proj-features--empty">
+      </ul>
+      <div class="stack">
+        <span>Techno</span><span>Techno</span><span>Techno</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="eyebrow" style="margin-top:50px;">Hors ligne</div>
+  <h2 style="font-size:20px;">Centres d'intérêt</h2>
+  <div class="hobbies">
+    <span class="hobby">Photographie</span>
+    <span class="hobby">Pâtisserie</span>
+    <span class="hobby">Maintenance informatique</span>
+    <span class="hobby">Handball</span>
+    <span class="hobby">Infographie</span>
+    <span class="hobby">Lecture</span>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="contact-wrap">
+    <div class="contact-panel">
+      <div>
+        <div class="status-line"><span class="led"></span> SYSTÈME PRÊT — EN ATTENTE DE CONNEXION</div>
+        <h3>Discutons de votre projet</h3>
+        <p>Disponible pour des missions de maintenance informatique, d'infographie ou de développement web.</p>
+      </div>
+      <div class="contact-links">
+        <a href="mailto:dan.boupo.jephte@gmail.com">dan.boupo.jephte@gmail.com</a>
+        <a href="tel:+24165290589">+241 065-29-05-89</a>
+        <a href="tel:+24174889391">+241 074-88-93-91</a>
+      </div>
+    </div>
+  </div>
+  <div class="foot-meta">
+    <span>Libreville, Gabon</span>
+    <span>N° ONE : 23675</span>
+  </div>
+</footer>
+
+<script>
+  const bootLines = [
+    { t: "> INIT boupo_dan.sys ...", cls: "dim" },
+    { t: "> Chargement du profil ................ [OK]", cls: "ok" },
+    { t: "> Vérification des compétences système . [OK]", cls: "ok" },
+    { t: "> Modules chargés : SYSTEMES, RESEAU, DEV, SECURITE", cls: "dim" },
+    { t: "> Statut : PRÊT POUR MISSION", cls: "warn" }
+  ];
+  const el = document.getElementById('boot');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function render(){
+    el.innerHTML = bootLines.map(l => `<span class="${l.cls}">${l.t}</span>`).join('\n') + '<span class="cursor"></span>';
+  }
+
+  if(reduce){
+    render();
+  } else {
+    el.innerHTML = '';
+    let i = 0;
+    function typeLine(){
+      if(i >= bootLines.length){ 
+        el.innerHTML += '<span class="cursor"></span>';
+        return; 
+      }
+      const line = bootLines[i];
+      let j = 0;
+      const span = document.createElement('span');
+      span.className = line.cls;
+      el.appendChild(span);
+      const interval = setInterval(() => {
+        span.textContent += line.t[j];
+        j++;
+        if(j >= line.t.length){
+          clearInterval(interval);
+          el.appendChild(document.createElement('br'));
+          i++;
+          setTimeout(typeLine, 120);
+        }
+      }, 12);
+    }
+    typeLine();
+  }
+</script>
+
+</body>
+</html>
